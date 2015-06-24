@@ -33,5 +33,6 @@ module Router6 extends NetworkLayerNodeBase
         hasIpv4 = default(false);
         hasIpv6 = default(true);
         *.routingTable.routes = routes;
+        @figure[submodules];
 }
 
