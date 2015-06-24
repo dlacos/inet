@@ -680,7 +680,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
         int protocol = bogusPacket->getTransportProtocol();
         int gateindex = mapping.getOutputGateForProtocol(protocol);
-        send(msg, "transportOut", gateindex);
+        send(msg, "transportOut");
     }
     else {
         // all others are delivered to ICMP:
