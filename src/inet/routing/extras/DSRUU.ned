@@ -36,6 +36,7 @@ simple DSRUU like IManetRouting
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string networkProtocolModule;
         @display("i=block/routing");
         @reactive;                             // IP module will send control messages when no route is present to the destination
         bool PrintDebug = default(false);  // print protocol depcific debugging information // (non RFC parameter)

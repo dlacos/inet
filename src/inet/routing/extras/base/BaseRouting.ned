@@ -25,6 +25,7 @@ simple BaseRouting
 {
     parameters:
         @display("i=block/routing");
+        string networkProtocolModule;
         string excludedInterfaces = default(""); // list of interfaces excluded by the manet routing protocol
         string interfaces = default("prefix(wlan)"); // list of routing interfaces were the routing protocol is active, the
                                                 // prefix(namei) indicate all the interfaces with "namei" in his names
