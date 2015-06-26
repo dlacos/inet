@@ -24,6 +24,7 @@
 #include "inet/networklayer/ipv4/ICMP.h"
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/contract/IcmpErrorControlInfo.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -33,6 +34,34 @@
 namespace inet {
 
 Define_Module(ICMP);
+
+IcmpErrorControlInfoErrorCodes icmpToErrorCode(int type, int code)
+{
+    switch (type) {
+        case ICMP_DESTINATION_UNREACHABLE:
+            switch (code) {
+                case ICMP_DU_NETWORK_UNREACHABLE: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_HOST_UNREACHABLE: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_PROTOCOL_UNREACHABLE: return ICMPERROR_PROTOCOL_UNREACHABLE;
+                case ICMP_DU_PORT_UNREACHABLE: return ICMPERROR_PORT_UNREACHABLE;
+                case ICMP_DU_FRAGMENTATION_NEEDED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_SOURCE_ROUTE_FAILED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_DESTINATION_NETWORK_UNKNOWN: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_DESTINATION_HOST_UNKNOWN: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_SOURCE_HOST_ISOLATED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_NETWORK_PROHIBITED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_HOST_PROHIBITED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_NETWORK_UNREACHABLE_FOR_TYPE_OF_SERVICE: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_HOST_UNREACHABLE_FOR_TYPE_OF_SERVICE: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_COMMUNICATION_PROHIBITED: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_HOST_PRECEDENCE_VIOLATION: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_DU_PRECEDENCE_CUTOFF_IN_EFFECT: return ICMPERROR_DEST_UNREACHABLE;
+                case ICMP_AODV_QUEUE_FULL: return ICMPERROR_DEST_UNREACHABLE;
+                default: return ICMPERROR_DEST_UNREACHABLE;
+            }
+        default: throw cRuntimeError("Unknown icmp type: %d", type);
+    }
+}
 
 void ICMP::initialize(int stage)
 {
@@ -51,6 +80,11 @@ void ICMP::handleMessage(cMessage *msg)
         processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
     }
+    else if (!strcmp(arrivalGate->getName(), "transportIn")) {
+        processUpperMessage(msg);
+    }
+    else
+        throw cRuntimeError("unknown gate: '%s'", arrivalGate->getName());
 }
 
 void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code)
@@ -169,24 +203,37 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
     }
 }
 
+void ICMP::processUpperMessage(cMessage *msg)
+{
+    throw cRuntimeError("not implemented");
+}
+
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
 {
     switch (icmpmsg->getType()) {
-        case ICMP_DESTINATION_UNREACHABLE:
-            errorOut(icmpmsg);
-            break;
-
         case ICMP_REDIRECT:
-            errorOut(icmpmsg);
+            // TODO implement redirect handling
+            delete icmpmsg;
             break;
 
+        case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
-            errorOut(icmpmsg);
+        case ICMP_PARAMETER_PROBLEM: {
+            // ICMP errors are delivered to the appropriate higher layer protocol
+            IPv4Datagram *bogusL3Packet = check_and_cast<IPv4Datagram *>(icmpmsg->getEncapsulatedPacket());
+            cPacket *bogusTransportPacket = bogusL3Packet->decapsulate();
+            if (bogusTransportPacket) {
+                IcmpErrorControlInfo *ctrl = new IcmpErrorControlInfo();
+                ctrl->setTransportProtocol(bogusL3Packet->getTransportProtocol());
+                ctrl->setSourceAddress(bogusL3Packet->getSourceAddress());
+                ctrl->setDestinationAddress(bogusL3Packet->getDestinationAddress());
+                ctrl->setErrorCode(icmpToErrorCode(icmpmsg->getType(), icmpmsg->getCode()));
+                bogusTransportPacket->setControlInfo(ctrl);
+                send(bogusTransportPacket, "transportOut");
+            }
+            delete icmpmsg;
             break;
-
-        case ICMP_PARAMETER_PROBLEM:
-            errorOut(icmpmsg);
-            break;
+        }
 
         case ICMP_ECHO_REQUEST:
             processEchoRequest(icmpmsg);
