@@ -24,14 +24,21 @@ cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+
+namespace inet {
+    typedef INetworkProtocolControlInfo *INetworkProtocolControlInfoPtr;
+}
+
 }}
 
 namespace inet;
 
 class noncobject L3Address;
+class noncobject INetworkProtocolControlInfoPtr;
 
 enum IcmpErrorControlInfoErrorCodes {
-    ICMPERROR_DEST_UNREACHABLE = 1001;
+    ICMPERROR_DEST_UNREACHABLE = 1000;
+    ICMPERROR_HOST_UNREACHABLE = 1001;
     ICMPERROR_PROTOCOL_UNREACHABLE = 1002;
     ICMPERROR_PORT_UNREACHABLE = 1003;
     ICMPERROR_TIME_EXCEEDED = 1004;
@@ -51,5 +58,6 @@ class IcmpErrorControlInfo
     L3Address sourceAddress @getter(_getSourceAddress);
     L3Address destinationAddress @getter(_getDestinationAddress);
     int errorCode @enum(IcmpErrorControlInfoErrorCodes) = -1;
+    INetworkProtocolControlInfoPtr networkProtocolControlInfo;  // owned by IcmpErrorControlInfo
 }
 
