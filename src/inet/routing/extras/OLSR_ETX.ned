@@ -42,6 +42,7 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
     parameters:
         @class(OLSR_ETX);
         string interfaceTableModule;
+        string networkProtocolModule;
         string routingTableModule;
         string icmpModule;
         string arpModule;

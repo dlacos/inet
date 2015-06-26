@@ -35,6 +35,7 @@ simple DSRUU like IManetRouting
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string networkProtocolModule;
         string routingTableModule;
         string networkProtocolModule;
         @display("i=block/routing");

@@ -33,6 +33,7 @@ simple Batman extends BaseRouting like IManetRouting
 {
     parameters:
         string interfaceTableModule;
+        string networkProtocolModule;
         string routingTableModule;
         string icmpModule;
         string arpModule;

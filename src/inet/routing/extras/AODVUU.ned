@@ -35,6 +35,7 @@ simple AODVUU extends BaseRouting like IManetRouting
 {
     parameters:
         string interfaceTableModule;
+        string networkProtocolModule;
         string routingTableModule;
         string icmpModule;
         string arpModule;

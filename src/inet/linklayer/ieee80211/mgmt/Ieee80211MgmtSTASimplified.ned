@@ -35,6 +35,7 @@ simple Ieee80211MgmtSTASimplified like IIeee80211Mgmt
 {
     parameters:
         string accessPointAddress; // MAC address of associate AP
+        string interfaceTableModule;   // The path to the InterfaceTable module
         int frameCapacity = default(100);
         string interfaceTableModule;
         string macModule;               // The path to the MAC module

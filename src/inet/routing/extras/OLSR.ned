@@ -39,6 +39,7 @@ simple OLSR extends BaseRouting like IManetRouting
     parameters:
         @class(OLSR);
         string interfaceTableModule;
+        string networkProtocolModule;
         string routingTableModule;
         string icmpModule;
         string arpModule;

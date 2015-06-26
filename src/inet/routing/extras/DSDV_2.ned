@@ -38,6 +38,7 @@ simple DSDV_2 like IManetRouting
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string networkProtocolModule;
         string routingTableModule;
         @display("i=block/routing");
         double hellomsgperiod_DSDV @unit("s") = default(5s);  // how often hello messages should be sent out
