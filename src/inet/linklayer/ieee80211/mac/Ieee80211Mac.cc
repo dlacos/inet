@@ -36,7 +36,7 @@ namespace ieee80211 {
 Define_Module(Ieee80211Mac);
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(inet::Ieee80211Mac,
+Register_Enum(inet::ieee80211::Ieee80211Mac,
         (Ieee80211Mac::IDLE,
          Ieee80211Mac::DEFER,
          Ieee80211Mac::WAITAIFS,
